@@ -5,14 +5,11 @@ use TemplateEngine\Parser;
 use TemplateEngine\Compiler;
 
 class Engine {
-    public $program = array();
+    public $program = NULL;
     public $variables = array();
 
-    private $pc = 0;
-    private $stack = array();
-
     public function __construct() {
-        $this->program = array();
+        $this->program = new Program();
         $this->variables = array();
     }
     
@@ -32,72 +29,59 @@ class Engine {
         return $this;
     }
 
-    private function directRun(string $content) {
-        $this->pc++;
+    private function directRun(Action $action, string $content) {
         return $content;
     }
 
-    private function variableRun(string $variableName) {
-        $this->pc++;
+    private function variableRun(Action $action, string $variableName) {
         if(!isset($this->variables[$variableName])) return "";
 
         return $this->variables[$variableName];
     }
 
-    private function forRun(string $item, string $container) {
-        $this->pc++;
-        return "";
-    }
+    private function forRun(Action $action, string $name, string $inName) {
+        if(!isset($this->variables[$contName])) return "";
 
-    private function endforRun() {
-        $this->pc++;
-        return "";
+        $output = "";
+        foreach($this->variables[$inName] as $item) {
+            $this->variables[$name] = $item;
+            $output .= $this->mainLoop($action->program);
+        }
+        
+        return $output;
     }
 
     private function compare($a, string $cmp, $b) {
     
     }
 
-    private function ifidRun(string $id1, string $cmp, string $id2) {
-        $this->pc++;
+    private function ifidRun(Action $action, string $id1, string $cmp, string $id2) {
         return "";
     }
 
-    private function ifstrRun(string $id, string $cmp, string $string) {
-        $this->pc++;
+    private function ifstrRun(Action $action, string $id, string $cmp, string $string) {
         return "";
     }
 
-    private function ifnumRun(string $id, string $cmp, string $number) {
-        $this->pc++;
+    private function ifnumRun(Action $action, string $id, string $cmp, string $number) {
         return "";
     }
 
-    private function elseRun() {
-        $this->pc++;
-        return "";
-    }
-
-    private function endifRun() {
-        $this->pc++;
-        return "";
-    }
-
-    public function output() {
-        // Initializes the processor
-        $this->pc = 0;
-        $this->stack = array();
-
+    private function mainLoop(Program $program) {
         $output = "";
 
-        while($this->pc < $this->program->length()) {
-            $action = $this->program->at($this->pc);
+        for($index = 0; $index < $program->length(); $index++) {
+            $action = $program->at($index);
             $output .= call_user_func_array(
                 array($this, $action->type . "Run"),
-                $action->parameters
+                array_merge(array($action), $action->parameters)
             );
         }
 
         return $output;
+    }
+
+    public function output() {
+        return $this->mainLoop($this->program);
     }
 }
