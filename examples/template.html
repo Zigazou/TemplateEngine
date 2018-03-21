@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>{% pageTitle %}</title>
+  </head>
+  <body>
+    <h1>{% pageTitle %}</h1>
+    <ul>
+    {{ for system in systems }}
+      <li>
+        <a href="{% system.url>attr5 %}">{% system.name %}</a>
+        by {% system.author %} is {% system.quality %}
+        {{ if system.name == "tplBlock" }}(maybe){{ else }}(really?){{ endif }}
+      </li> 
+    {{ endfor }}
+    </ul>
+  </body>
+</html>
