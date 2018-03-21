@@ -53,7 +53,7 @@ final class ParserTest extends TestCase {
             new Token("CMD_OPEN", "{{", 0),
             new Token("IF", "if", 2),
             new Token("ID", "a", 5),
-            new Token("CMP_EQ", "==", 6),
+            new Token("CMP", "==", 6),
             new Token("STRING", "\"b\\\"b\"", 8),
             new Token("CMD_CLOSE", "}}", 14),
         );
@@ -66,12 +66,12 @@ final class ParserTest extends TestCase {
         $actual = $parser->parseString($string);
         $expected = array(
             new Token("CMD_OPEN", "{{", 0),
-            new Token("CMP_EQ", "==", 2),
-            new Token("CMP_GE", ">=", 4),
-            new Token("CMP_LE", "<=", 6),
-            new Token("CMP_LT", "<", 8),
-            new Token("CMP_GT", ">", 9),
-            new Token("CMP_NE", "!=", 10),
+            new Token("CMP", "==", 2),
+            new Token("CMP", ">=", 4),
+            new Token("CMP", "<=", 6),
+            new Token("CMP", "<", 8),
+            new Token("CMP", ">", 9),
+            new Token("CMP", "!=", 10),
             new Token("CMD_CLOSE", "}}", 12),
         );
         $this->assertEquals($expected, $actual);

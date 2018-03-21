@@ -18,17 +18,13 @@ class Parser {
             "FOR" => array("for(?![[:alnum:]])", "command", FALSE),
             "ENDFOR" => array("endfor(?![[:alnum:]])", "command", FALSE),
             "IF" => array("if(?![[:alnum:]])", "command", FALSE),
+            "ELSE" => array("else(?![[:alnum:]])", "command", FALSE),
             "IN" => array("in(?![[:alnum:]])", "command", FALSE),
             "ENDIF" => array("endif(?![[:alnum:]])", "command", FALSE),
             "ID" => array("[[:alpha:]][[:alnum:]]*", "command", FALSE),
             "STRING" => array('"(\\\\"|\\\\\\\\|[^"])*"', "command", FALSE),
             "NUMBER" => array("[0-9]+(.[0-9]+)?", "command", FALSE),
-            "CMP_EQ" => array("==", "command", FALSE),
-            "CMP_NE" => array("!=", "command", FALSE),
-            "CMP_LE" => array("<=", "command", FALSE),
-            "CMP_GE" => array(">=", "command", FALSE),
-            "CMP_LT" => array("<", "command", FALSE),
-            "CMP_GT" => array(">", "command", FALSE),
+            "CMP" => array("(==|!=|<=|>=|<|>)", "command", FALSE),
             "BLANK" => array("[[:space:]]+", "command", TRUE),
         ),
 
@@ -55,7 +51,7 @@ class Parser {
         while($offset < strlen($string)) {
             $found = FALSE;
 
-            /* Try every possible transition from the current state */
+            // Try every possible transition from the current state
             foreach(self::AUTOMATON[$state] as $type => $transition) {
                 list($regex, $nextState, $ignore) = $transition;
 
@@ -68,24 +64,24 @@ class Parser {
                     $offset
                 );
 
-                /* A token has been recognized */
+                // A token has been recognized
                 if($found) {
-                    /* Add it to the Token array if it should not be ignored */
+                    // Add it to the Token array if it should not be ignored
                     if(!$ignore) {
                         $tokens []= new Token($type, $matches[0], $offset);
                     }
 
-                    /* Update the offset */
+                    // Update the offset
                     $offset += strlen($matches[0]);
 
-                    /* Go to the next state */
+                    // Go to the next state
                     $state = $nextState;
                     break;
                 }
             }
 
             if(!$found) {
-                /* The automaton did not recognize a Token, throw an error */
+                // The automaton did not recognize a Token, throw an error
                 throw new \ParseError(
                     "Unexpected character '" . $string[$offset] . "' " .
                     "at offset " . $offset
