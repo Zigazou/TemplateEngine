@@ -1,6 +1,8 @@
 <?php
 namespace TemplateEngine;
+
 use \TemplateEngine\Token;
+use \TemplateEngine\TokenSequence;
 
 class Parser {
     /** The automaton
@@ -40,13 +42,13 @@ class Parser {
     }
 
     /**
-     * Parse a string and returns an array of Token. If an unexpected
+     * Parse a string and returns a TokenSequence. If an unexpected
      * character is found, it throws a ParseError exception.
      */
     public function parseString(string $string) {
         $state = "content";
         $offset = 0;
-        $tokens = array();
+        $tokens = new TokenSequence();
 
         while($offset < strlen($string)) {
             $found = FALSE;
@@ -68,7 +70,9 @@ class Parser {
                 if($found) {
                     // Add it to the Token array if it should not be ignored
                     if(!$ignore) {
-                        $tokens []= new Token($type, $matches[0], $offset);
+                        $tokens->addToken(
+                            new Token($type, $matches[0], $offset)
+                        );
                     }
 
                     // Update the offset

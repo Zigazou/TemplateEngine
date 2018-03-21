@@ -1,6 +1,9 @@
 <?php
 namespace TemplateEngine;
+
 use TemplateEngine\Action;
+use TemplateEngine\TokenSequence;
+use TemplateEngine\Program;
 
 class Compiler {
     const CHECKS = array(
@@ -31,62 +34,117 @@ class Compiler {
 
     }
 
-    public function extractParameters(string $actionType, array $tokens) {
+    private function extractParameters(string $type, TokenSequence $tokens) {
         $parameters = array();
-        foreach(self::PARAMETERS[$actionType] as $index) {
-            $parameters []= $tokens[$index]->content;
+        foreach(self::PARAMETERS[$type] as $index) {
+            $parameters []= $tokens->at($index)->content;
         }
         return $parameters;
     }
 
-    public function compile(array $tokens) {
+    private function sequenceMatch() {
+
+    }
+
+    private function createActions(TokenSequence $tokens) {
         $index = 0;
-        $program = array();
+        $program = new Program();
 
         // Read all tokens
-        while($index < count($tokens)) {
+        while($index < $tokens->length()) {
             $validSequence = FALSE;
 
             // Try each sequence recognized by the language
-            foreach(self::CHECKS as $action => $sequence) {
-                $sequenceMatch = TRUE;
-
-                // Try to read the sequence from the Token list
-                foreach($sequence as $offset => $tokenType) {
-                    // Do not try to read more token than available
-                    if($index + $offset >= count($tokens)) {
-                        $sequenceMatch = FALSE;
-                        break;
-                    }
-
-                    // The tokens do not match, this sequence is not good
-                    if($tokens[$index + $offset]->type != $tokenType) {
-                        $sequenceMatch = FALSE;
-                        break;
-                    }
-                }
+            foreach(self::CHECKS as $action => $types) {
+                if(!$tokens->startsWithTypes($types, $index)) continue;
 
                 // The sequence matches the tokens
-                if($sequenceMatch) {
-                    $subTokens = array_slice($tokens, $index, count($sequence));
-                    $program []= new Action(
-                        $action,
-                        $this->extractParameters($action, $subTokens),
-                        $subTokens[0]->offset
-                    );
-                    $validSequence = TRUE;
-                    $index += count($sequence);
-                    break;
-                }
+                $subTokens = $tokens->slice($index, count($types));
+                $program->addAction(new Action(
+                    $action,
+                    $this->extractParameters($action, $subTokens),
+                    $subTokens->at(0)->offset
+                ));
+                $validSequence = TRUE;
+                $index += count($types);
+                break;
             }
 
             // The sequence is not valid, throw an exception
             if(!$validSequence) {
                 throw new \ParseError(
-                    "Invalid sequence at offset " . $tokens[$index]->offset
+                    "Invalid sequence at offset " . $tokens->at($index)->offset
                 );
             }
         }
+
+        return $program;
+    }
+
+    private function buildTree(Program $actions, string $curType, int &$index) {
+        $program = new Program();
+
+        while($index < $actions->length()) {
+            $action = $actions->at($index);
+            $type = $action->type;
+            $offset = $action->offset;
+
+            if(in_array($type, array("direct", "variable"))) {
+                $program->addAction($action);
+            } elseif($type == "for") {
+                $index++;
+
+                $action->program = $this->buildTree(
+                    $actions,
+                    "for",
+                    $index
+                );
+
+                $program->addAction($action);
+            } elseif($type == "endfor") {
+                if($curType != "for") {
+                    throw new \ParseError("Unexpected $type at offset $offset");
+                }
+                return $program;
+            } elseif(in_array($type, array("ifid", "ifstr", "ifnum"))) {
+                $index++;
+                $action->program = $this->buildTree(
+                    $actions,
+                    "if",
+                    $index
+                );
+
+                if($actions->at($index)->type == "else") {
+                    $index++;
+                    $action->alternative = $this->buildTree(
+                        $actions,
+                        "if",
+                        $index
+                    );
+                }
+
+                $program->addAction($action);
+            } elseif(in_array($type, array("else", "endif"))) {
+                if($curType != "if") {
+                    throw new \ParseError("Unexpected $type at offset $offset");
+                }
+                return $program;
+            }
+
+            $index++;
+        }
+
+        return $program;
+    }
+
+    private function createActionsTree(Program $actions) {
+        $index = 0;
+
+        return $this->buildTree($actions, "", $index);
+    }
+
+    public function compile(TokenSequence $tokens) {
+        $program = $this->createActionsTree($this->createActions($tokens));
 
         return $program;
     }

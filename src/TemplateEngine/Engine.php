@@ -90,8 +90,8 @@ class Engine {
 
         $output = "";
 
-        while($this->pc < count($this->program)) {
-            $action = $this->program[$this->pc];
+        while($this->pc < $this->program->length()) {
+            $action = $this->program->at($this->pc);
             $output .= call_user_func_array(
                 array($this, $action->type . "Run"),
                 $action->parameters
