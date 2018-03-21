@@ -106,15 +106,16 @@ class Engine {
         string $inName
     ) {
         // Ignore if the container does not existe
-        if(!isset($this->variables[$inName])) return "";
+        $container = $this->getVariable($inName);
+        if($container === NULL) return "";
 
         // Throw an exception if the container is not an array
-        if(!is_array($this->variables[$inName])) {
+        if(!is_array($container)) {
             throw new \InvalidArgumentException("$inName is not an array");
         }
 
         $output = "";
-        foreach($this->variables[$inName] as $item) {
+        foreach($container as $item) {
             $this->variables[$name] = $item;
             $output .= $this->mainLoop($action->program);
         }
@@ -141,15 +142,13 @@ class Engine {
         string $identifier2
     ) {
         // Ignore if an identifier does not existe
-        if(!isset($this->variables[$identifier1])) return "";
-        if(!isset($this->variables[$identifier2])) return "";
+        $value1 = $this->getVariable($identifier1);
+        if($value1 === NULL) return "";
+        $value2 = $this->getVariable($identifier2);
+        if($value2 === NULL) return "";
 
         // Do the comparison
-        $comparisonIsTrue = $this->compare(
-            $this->variables[$identifier1],
-            $comparator,
-            $this->variables[$identifier2]
-        );
+        $comparisonIsTrue = $this->compare($value1, $comparator, $value2);
 
         if($comparisonIsTrue) {
             return $this->mainLoop($action->program);
@@ -165,14 +164,11 @@ class Engine {
         string $string
     ) {
         // Ignore if the identifier does not existe
-        if(!isset($this->variables[$identifier])) return "";
+        $value = $this->getVariable($identifier);
+        if($value === NULL) return "";
 
         // Do the comparison
-        $comparisonIsTrue = $this->compare(
-            $this->variables[$identifier],
-            $comparator,
-            $string
-        );
+        $comparisonIsTrue = $this->compare($value, $comparator, $string);
 
         if($comparisonIsTrue) {
             return $this->mainLoop($action->program);
@@ -188,14 +184,11 @@ class Engine {
         float $number
     ) {
         // Ignore if the identifier does not existe
-        if(!isset($this->variables[$identifier])) return "";
+        $value = $this->getVariable($identifier);
+        if($value === NULL) return "";
 
         // Do the comparison
-        $comparisonIsTrue = $this->compare(
-            (float) $this->variables[$identifier],
-            $comparator,
-            $number
-        );
+        $comparisonIsTrue = $this->compare((float)$value, $comparator, $number);
 
         if($comparisonIsTrue) {
             return $this->mainLoop($action->program);

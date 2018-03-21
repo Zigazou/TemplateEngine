@@ -166,6 +166,27 @@ final class EngineTest extends TestCase {
         $this->assertEquals("", $result);
     }
 
+    public function testIfNameComponents() {
+        $template = "{{ if a.b == 42 }}YES{{ else }}NO{{ endif }}";
+ 
+        $engine = new Engine();
+        $engine->loadTemplate($template);
+
+        $variables = array("a" => array("b" => 42));
+
+        $result = $engine->setVariables($variables)
+                         ->output();
+
+        $this->assertEquals("YES", $result);
+
+        $variables = array("a" => array("b" => 33));
+
+        $result = $engine->setVariables($variables)
+                         ->output();
+
+        $this->assertEquals("NO", $result);
+    }
+
     public function testVariableFilter() {
         $template = "{% a>trim %}";
  
