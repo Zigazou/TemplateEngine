@@ -7,10 +7,18 @@ use TemplateEngine\Compiler;
 class Engine {
     public $program = NULL;
     public $variables = array();
+    public $defaultFilter = "raw";
 
     public function __construct() {
         $this->program = new Program();
         $this->variables = array();
+        $this->defaultFilter = "raw";
+    }
+
+    public function setDefaultFilter(string $filter) {
+        $this->defaultFilter = $filter;
+
+        return $this;
     }
     
     public function loadTemplate(string $string) {
@@ -29,14 +37,67 @@ class Engine {
         return $this;
     }
 
+    private function getVariable(string $identifier) {
+        $elements = explode(".", $identifier);
+
+        $current = $this->variables;
+        foreach($elements as $element) {
+            if(!is_array($current)) return NULL;
+            if(!isset($current[$element])) return NULL;
+            $current = $current[$element];
+        }
+
+        return $current;
+    }
+
+    private function applyFilter(string $filter, string $string) {
+        switch($filter) {
+            case "attr4":
+                return htmlspecialchars($string, ENT_QUOTES | ENT_HTML401);
+
+            case "attr5":
+                return htmlspecialchars($string, ENT_QUOTES | ENT_HTML5);
+
+            case "html4":
+                return htmlspecialchars($string, ENT_NOQUOTES | ENT_HTML401);
+
+            case "html5":
+                return htmlspecialchars($string, ENT_NOQUOTES | ENT_HTML5);
+
+            case "trim":
+                return trim($string);
+
+            case "raw":
+                return $string;
+
+            default:
+                throw new \InvalidArgumentException("Unknown filter $filter");
+        }
+    }
+
     private function directRun(Action $action, string $content) {
         return $content;
     }
 
-    private function variableRun(Action $action, string $variableName) {
-        if(!isset($this->variables[$variableName])) return "";
+    private function variableRun(
+        Action $action,
+        string $variableName
+    ) {
+        $content = $this->getVariable($variableName);
+        if($content === NULL) return "";
 
-        return $this->variables[$variableName];
+        return $this->applyFilter($this->defaultFilter, $content);
+    }
+
+    private function varfilterRun(
+        Action $action,
+        string $variableName,
+        string $filter
+    ) {
+        $content = $this->getVariable($variableName);
+        if($content === NULL) return "";
+
+        return $this->applyFilter($filter, $content);
     }
 
     private function forRun(

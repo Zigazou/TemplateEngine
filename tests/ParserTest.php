@@ -33,15 +33,15 @@ final class ParserTest extends TestCase {
     }
 
     public function testParseDirectVariableDirect() {
-        $string = "A{% variable %}B";
+        $string = "A{% variable.attribute %}B";
         $parser = new Parser();
         $actual = $parser->parseString($string);
         $expected = new TokenSequence(array(
             new Token("DIRECT", "A", 0),
             new Token("VAR_OPEN", "{%", 1),
-            new Token("ID", "variable", 4),
-            new Token("VAR_CLOSE", "%}", 13),
-            new Token("DIRECT", "B", 15),
+            new Token("ID", "variable.attribute", 4),
+            new Token("VAR_CLOSE", "%}", 23),
+            new Token("DIRECT", "B", 25),
         ));
         $this->assertEquals($expected, $actual);
     }

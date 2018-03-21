@@ -23,7 +23,7 @@ class Parser {
             "ELSE" => array("else(?![[:alnum:]])", "command", FALSE),
             "IN" => array("in(?![[:alnum:]])", "command", FALSE),
             "ENDIF" => array("endif(?![[:alnum:]])", "command", FALSE),
-            "ID" => array("[[:alpha:]][[:alnum:]]*", "command", FALSE),
+            "ID" => array("[[:alpha:]][.[:alnum:]]*", "command", FALSE),
             "STRING" => array('"(\\\\"|\\\\\\\\|[^"])*"', "command", FALSE),
             "NUMBER" => array("[0-9]+(.[0-9]+)?", "command", FALSE),
             "CMP" => array("(==|!=|<=|>=|<|>)", "command", FALSE),
@@ -32,7 +32,8 @@ class Parser {
 
         "variable" => array(
             "VAR_CLOSE" => array("%}", "content", FALSE),
-            "ID" => array("[[:alpha:]][[:alnum:]]*", "variable", FALSE),
+            "ID" => array("[[:alpha:]][.[:alnum:]]*", "variable", FALSE),
+            "FILTER" => array(">[[:alpha:]][[:alnum:]]*", "variable", FALSE),
             "BLANK" => array("[[:space:]]+", "variable", TRUE),
         ),
     );

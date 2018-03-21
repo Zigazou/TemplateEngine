@@ -9,6 +9,7 @@ class Compiler {
     const CHECKS = array(
         "direct" => array("DIRECT"),
         "variable" => array("VAR_OPEN", "ID", "VAR_CLOSE"),
+        "varfilter" => array("VAR_OPEN", "ID", "FILTER", "VAR_CLOSE"),
         "for" => array("CMD_OPEN", "FOR", "ID", "IN", "ID", "CMD_CLOSE"),
         "endfor" => array("CMD_OPEN", "ENDFOR", "CMD_CLOSE"),
         "ifid" => array("CMD_OPEN", "IF", "ID", "CMP", "ID", "CMD_CLOSE"),
@@ -21,6 +22,7 @@ class Compiler {
     const PARAMETERS = array(
         "direct" => array(0),
         "variable" => array(1),
+        "varfilter" => array(1, 2),
         "for" => array(2, 4),
         "endfor" => array(),
         "ifid" => array(2, 3, 4),
@@ -54,6 +56,8 @@ class Compiler {
                 $content = $this->unescapeString($token->content);
             } elseif($token->type === "NUMBER") {
                 $content = (float)$token->content;
+            } elseif($token->type === "FILTER") {
+                $content = substr($token->content, 1);
             } else {
                 $content = $token->content;
             }
@@ -109,7 +113,7 @@ class Compiler {
             $type = $action->type;
             $offset = $action->offset;
 
-            if(in_array($type, array("direct", "variable"))) {
+            if(in_array($type, array("direct", "variable", "varfilter"))) {
                 $program->addAction($action);
             } elseif($type == "for") {
                 $index++;
