@@ -39,8 +39,18 @@ class Engine {
         return $this->variables[$variableName];
     }
 
-    private function forRun(Action $action, string $name, string $inName) {
-        if(!isset($this->variables[$contName])) return "";
+    private function forRun(
+        Action $action,
+        string $name,
+        string $inName
+    ) {
+        // Ignore if the container does not existe
+        if(!isset($this->variables[$inName])) return "";
+
+        // Throw an exception if the container is not an array
+        if(!is_array($this->variables[$inName])) {
+            throw new \InvalidArgumentException("$inName is not an array");
+        }
 
         $output = "";
         foreach($this->variables[$inName] as $item) {
@@ -51,20 +61,86 @@ class Engine {
         return $output;
     }
 
-    private function compare($a, string $cmp, $b) {
-    
+    private function compare($a, string $comparator, $b) {
+        switch($comparator) {
+            case '==': return $a === $b;
+            case '!=': return $a !== $b;
+            case '>=': return $a >= $b;
+            case '<=': return $a <= $b;
+            case '>': return $a > $b;
+            case '<': return $a < $b;
+            default: return FALSE;
+        }
     }
 
-    private function ifidRun(Action $action, string $id1, string $cmp, string $id2) {
-        return "";
+    private function ifidRun(
+        Action $action,
+        string $identifier1,
+        string $comparator,
+        string $identifier2
+    ) {
+        // Ignore if an identifier does not existe
+        if(!isset($this->variables[$identifier1])) return "";
+        if(!isset($this->variables[$identifier2])) return "";
+
+        // Do the comparison
+        $comparisonIsTrue = $this->compare(
+            $this->variables[$identifier1],
+            $comparator,
+            $this->variables[$identifier2]
+        );
+
+        if($comparisonIsTrue) {
+            return $this->mainLoop($action->program);
+        } else {
+            return $this->mainLoop($action->alternative);
+        }
     }
 
-    private function ifstrRun(Action $action, string $id, string $cmp, string $string) {
-        return "";
+    private function ifstrRun(
+        Action $action,
+        string $identifier,
+        string $comparator,
+        string $string
+    ) {
+        // Ignore if the identifier does not existe
+        if(!isset($this->variables[$identifier])) return "";
+
+        // Do the comparison
+        $comparisonIsTrue = $this->compare(
+            $this->variables[$identifier],
+            $comparator,
+            $string
+        );
+
+        if($comparisonIsTrue) {
+            return $this->mainLoop($action->program);
+        } else {
+            return $this->mainLoop($action->alternative);
+        }
     }
 
-    private function ifnumRun(Action $action, string $id, string $cmp, string $number) {
-        return "";
+    private function ifnumRun(
+        Action $action,
+        string $identifier,
+        string $comparator,
+        float $number
+    ) {
+        // Ignore if the identifier does not existe
+        if(!isset($this->variables[$identifier])) return "";
+
+        // Do the comparison
+        $comparisonIsTrue = $this->compare(
+            (float) $this->variables[$identifier],
+            $comparator,
+            $number
+        );
+
+        if($comparisonIsTrue) {
+            return $this->mainLoop($action->program);
+        } else {
+            return $this->mainLoop($action->alternative);
+        }
     }
 
     private function mainLoop(Program $program) {

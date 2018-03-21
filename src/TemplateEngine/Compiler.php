@@ -34,10 +34,31 @@ class Compiler {
 
     }
 
+    public function unescapeString(string $string) {
+        // Removes leading and ending double quotes
+        $string = substr($string, 1, -1);
+
+        $string = str_replace("\\\\", "\\", $string);
+        $string = str_replace("\\\"", "\"", $string);
+
+        return $string;
+    }
+
     private function extractParameters(string $type, TokenSequence $tokens) {
         $parameters = array();
         foreach(self::PARAMETERS[$type] as $index) {
-            $parameters []= $tokens->at($index)->content;
+            $token = $tokens->at($index);
+
+            if($token->type === "STRING") {
+                // Unescape strings
+                $content = $this->unescapeString($token->content);
+            } elseif($token->type === "NUMBER") {
+                $content = (float)$token->content;
+            } else {
+                $content = $token->content;
+            }
+
+            $parameters []= $content;
         }
         return $parameters;
     }
@@ -72,9 +93,8 @@ class Compiler {
 
             // The sequence is not valid, throw an exception
             if(!$validSequence) {
-                throw new \ParseError(
-                    "Invalid sequence at offset " . $tokens->at($index)->offset
-                );
+                $offset = $tokens->at($index)->offset;
+                throw new \ParseError("Invalid sequence at offset $offset");
             }
         }
 

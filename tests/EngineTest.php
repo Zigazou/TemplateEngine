@@ -30,4 +30,118 @@ final class EngineTest extends TestCase {
         $expected = "1234";
         $this->assertEquals($expected, $actual);
     }
+
+    public function testNotAnArrayUsedInForLoop() {
+        $this->expectException(InvalidArgumentException::class);
+
+        $template = "{{ for a in b }}{% a %}{{ endfor }}";
+        $variables = array("b" => "xyz");
+
+        $engine = new Engine();
+        $actual = $engine->loadTemplate($template)
+                         ->setVariables($variables)
+                         ->output();
+    }
+
+    public function testIfIdWithoutElse() {
+        $template = "{{ if a == b }}a==b{{ endif }}";
+
+        $engine = new Engine();
+        $engine->loadTemplate($template);
+
+        $result = $engine->setVariables(array("a" => "abc", "b" => "abc"))
+                         ->output();
+
+        $this->assertEquals("a==b", $result);
+
+        $result = $engine->setVariables(array("a" => "abc", "b" => "xyz"))
+                         ->output();
+
+        $this->assertEquals("", $result);
+    }
+
+    public function testIfIdWithElse() {
+        $template = "{{ if a == b }}a==b{{ else }}a!=b{{ endif }}";
+
+        $engine = new Engine();
+        $engine->loadTemplate($template);
+
+        $result = $engine->setVariables(array("a" => "abc", "b" => "abc"))
+                         ->output();
+
+        $this->assertEquals("a==b", $result);
+
+        $result = $engine->setVariables(array("a" => "abc", "b" => "xyz"))
+                         ->output();
+
+        $this->assertEquals("a!=b", $result);
+    }
+
+    public function testIfStrWithoutElse() {
+        $template = "{{ if a == \"a\\\"\\\\a\" }}YES{{ endif }}";
+
+        $engine = new Engine();
+        $engine->loadTemplate($template);
+
+        $result = $engine->setVariables(array("a" => "a\"\\a"))
+                         ->output();
+
+        $this->assertEquals("YES", $result);
+
+        $result = $engine->setVariables(array("a" => "xyz"))
+                         ->output();
+
+        $this->assertEquals("", $result);
+    }
+
+    public function testIfStrWithElse() {
+        $template = "{{ if a == \"a\\\"\\\\a\" }}YES{{ else }}NO{{ endif }}";
+
+        $engine = new Engine();
+        $engine->loadTemplate($template);
+
+        $result = $engine->setVariables(array("a" => "a\"\\a"))
+                         ->output();
+
+        $this->assertEquals("YES", $result);
+
+        $result = $engine->setVariables(array("a" => "xyz"))
+                         ->output();
+
+        $this->assertEquals("NO", $result);
+    }
+
+    public function testIfNumWithoutElse() {
+        $template = "{{ if a == 42 }}YES{{ endif }}";
+
+        $engine = new Engine();
+        $engine->loadTemplate($template);
+
+        $result = $engine->setVariables(array("a" => 42))
+                         ->output();
+
+        $this->assertEquals("YES", $result);
+
+        $result = $engine->setVariables(array("a" => 33))
+                         ->output();
+
+        $this->assertEquals("", $result);
+    }
+
+    public function testIfNumWithElse() {
+        $template = "{{ if a == 42 }}YES{{ else }}NO{{ endif }}";
+
+        $engine = new Engine();
+        $engine->loadTemplate($template);
+
+        $result = $engine->setVariables(array("a" => 42))
+                         ->output();
+
+        $this->assertEquals("YES", $result);
+
+        $result = $engine->setVariables(array("a" => 33))
+                         ->output();
+
+        $this->assertEquals("NO", $result);
+    }
 }
