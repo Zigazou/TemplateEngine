@@ -1,11 +1,25 @@
 <?php
+/**
+ * The Parser class.
+ *
+ * @author Frédéric BISSON <zigazou@free.fr>
+ */
 namespace TemplateEngine;
 
 use \TemplateEngine\Token;
 use \TemplateEngine\TokenSequence;
 
+/**
+ * The Parser class is juste a parser!
+ *
+ * It uses a simple 3-state automaton to do this.
+ * 
+ * @author Frédéric BISSON <zigazou@free.fr>
+ */
 class Parser {
-    /** The automaton
+    /**
+     * AUTOMATON The automaton
+     * 
      * array(state => array(tokenType => array(regex, nextState, ignore)))
      */
     const AUTOMATON = array(
@@ -38,6 +52,9 @@ class Parser {
         ),
     );
 
+    /**
+     * Constructor (does nothing particular)
+     */
     public function __construct() {
     
     }
@@ -45,6 +62,10 @@ class Parser {
     /**
      * Parse a string and returns a TokenSequence. If an unexpected
      * character is found, it throws a ParseError exception.
+     *
+     * @param string $string The string to parse.
+     * @return TokenSequence The string parsed in the form of a TokenSequence.
+     * @throws ParseError When an unexpected character is encountered.
      */
     public function parseString(string $string) {
         $state = "content";
@@ -58,7 +79,7 @@ class Parser {
             foreach(self::AUTOMATON[$state] as $type => $transition) {
                 list($regex, $nextState, $ignore) = $transition;
 
-                /* Test if the regex matches */
+                // Test if the regex matches
                 $found = preg_match(
                     '/' . $regex . '/As',
                     $string,

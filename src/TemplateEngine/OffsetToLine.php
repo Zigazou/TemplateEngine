@@ -1,13 +1,36 @@
 <?php
+/**
+ * The OffsetToLine class.
+ *
+ * @author Frédéric BISSON <zigazou@free.fr>
+ */
 namespace TemplateEngine;
 
+/**
+ * The OffsetToLine class converts an offset in string to a line
+ * number, allowing for better error message.
+ */
 class OffsetToLine {
+    /**
+     * @var array $lineOffsets The calculated (line => offset)
+     */
     private $lineOffsets = array();
 
+    /**
+     * Builds a OffsetToLine converter.
+     * 
+     * @param string $string The string to retrieve the line offsets from.
+     */
     public function __construct(string $string) {
         $this->findLines($string);
     }
 
+    /**
+     * Get the line number given an offset.
+     * 
+     * @param int $offset the offset for which to retrieve the line number.
+     * @return int The line number (starting at 0)
+     */
     public function getLine(int $offset) {
         $previousLine = 0;
 
@@ -20,13 +43,16 @@ class OffsetToLine {
             $previousLine = $line;
         }
 
-        if($offset >= $this->lineOffsets[$previousLine]) {
-            return $previousLine;
-        } else {
-            return 0;
-        }
+        if($offset >= $this->lineOffsets[$previousLine]) return $previousLine;
+
+        return 0;
     }
 
+    /**
+     * Find offset for every line in a string.
+     * 
+     * @param string $string The string to analyze.
+     */
     private function findLines(string $string) {
         $this->lineOffsets = array(0 => 0);
 

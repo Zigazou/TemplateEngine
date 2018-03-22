@@ -5,6 +5,11 @@
         ]
     },
     "require-dev": {
-        "phpunit/phpunit": "^6"
+        "phpunit/phpunit": "^6",
+        "phpdocumentor/phpdocumentor": "2.*"
+    },
+    "require": {
+        "overtrue/phplint": "^1.0",
+        "phpmd/phpmd": "^2.6"
     }
 }
