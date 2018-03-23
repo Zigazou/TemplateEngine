@@ -5,5 +5,4 @@ php:
   - '7.2'
   - nightly
 before_script: composer dump-autoload
-script:
-- phpunit --bootstrap vendor/autoload.php tests
+script: make test
