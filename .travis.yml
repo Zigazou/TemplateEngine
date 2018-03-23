@@ -4,5 +4,5 @@ php:
   - '7.1'
   - '7.2'
   - nightly
-before_script: composer dump-autoload
+before_script: composer update
 script: make test
