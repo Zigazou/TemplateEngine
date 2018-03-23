@@ -5,4 +5,4 @@ php:
   - '7.2'
   - nightly
 before_script: composer update
-script: make test
+script: make test lint

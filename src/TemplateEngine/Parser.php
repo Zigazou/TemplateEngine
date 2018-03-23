@@ -2,7 +2,13 @@
 /**
  * The Parser class.
  *
- * @author Frédéric BISSON <zigazou@free.fr>
+ * PHP version 7
+ *
+ * @category Template
+ * @package  TemplateEngine
+ * @author   Frédéric BISSON <zigazou@free.fr>
+ * @license  GNU GPL
+ * @link     https://github.com/Zigazou/TemplateEngine
  */
 namespace TemplateEngine;
 
@@ -13,50 +19,57 @@ use \TemplateEngine\TokenSequence;
  * The Parser class is juste a parser!
  *
  * It uses a simple 3-state automaton to do this.
- * 
- * @author Frédéric BISSON <zigazou@free.fr>
+ *
+ * @category Template
+ * @package  TemplateEngine
+ * @author   Frédéric BISSON <zigazou@free.fr>
+ * @license  GNU GPL
+ * @link     https://github.com/Zigazou/TemplateEngine
  */
-class Parser {
+class Parser
+{
     /**
-     * AUTOMATON The automaton
-     * 
-     * array(state => array(tokenType => array(regex, nextState, ignore)))
+     * The automaton.
+     *
+     * [ state => [ tokenType => [ regex, nextState, ignore ] ] ]
+     *
+     * @var array AUTOMATON
      */
-    const AUTOMATON = array(
-        "content" => array(
-            "CMD_OPEN" => array("{{", "command", FALSE),
-            "VAR_OPEN" => array("{%", "variable", FALSE),
-            "DIRECT" => array("(\\\\{|\\\\\\\\|[^{])+", "content", FALSE),
-        ),
+    const AUTOMATON = [
+        "content" => [
+            "CMD_OPEN" => [ "{{", "command", false ],
+            "VAR_OPEN" => [ "{%", "variable", false ],
+            "DIRECT"   => [ "(\\\\{|\\\\\\\\|[^{])+", "content", false ],
+        ],
 
-        "command" => array(
-            "CMD_CLOSE" => array("}}", "content", FALSE),
-            "FOR" => array("for(?![[:alnum:]])", "command", FALSE),
-            "ENDFOR" => array("endfor(?![[:alnum:]])", "command", FALSE),
-            "IF" => array("if(?![[:alnum:]])", "command", FALSE),
-            "ELSE" => array("else(?![[:alnum:]])", "command", FALSE),
-            "IN" => array("in(?![[:alnum:]])", "command", FALSE),
-            "ENDIF" => array("endif(?![[:alnum:]])", "command", FALSE),
-            "ID" => array("[[:alpha:]][.[:alnum:]]*", "command", FALSE),
-            "STRING" => array('"(\\\\"|\\\\\\\\|[^"])*"', "command", FALSE),
-            "NUMBER" => array("[0-9]+(.[0-9]+)?", "command", FALSE),
-            "CMP" => array("(==|!=|<=|>=|<|>)", "command", FALSE),
-            "BLANK" => array("[[:space:]]+", "command", TRUE),
-        ),
+        "command" => [
+            "CMD_CLOSE" => [ "}}", "content", false ],
+            "FOR"       => [ "for(?![[:alnum:]])", "command", false ],
+            "ENDFOR"    => [ "endfor(?![[:alnum:]])", "command", false ],
+            "IF"        => [ "if(?![[:alnum:]])", "command", false ],
+            "ELSE"      => [ "else(?![[:alnum:]])", "command", false ],
+            "IN"        => [ "in(?![[:alnum:]])", "command", false ],
+            "ENDIF"     => [ "endif(?![[:alnum:]])", "command", false ],
+            "ID"        => [ "[[:alpha:]][.[:alnum:]]*", "command", false ],
+            "STRING"    => [ '"(\\\\"|\\\\\\\\|[^"])*"', "command", false ],
+            "NUMBER"    => [ "[0-9]+(.[0-9]+)?", "command", false ],
+            "CMP"       => [ "(==|!=|<=|>=|<|>)", "command", false ],
+            "BLANK"     => [ "[[:space:]]+", "command", true ],
+        ],
 
-        "variable" => array(
-            "VAR_CLOSE" => array("%}", "content", FALSE),
-            "ID" => array("[[:alpha:]][.[:alnum:]]*", "variable", FALSE),
-            "FILTER" => array(">[[:alpha:]][[:alnum:]]*", "variable", FALSE),
-            "BLANK" => array("[[:space:]]+", "variable", TRUE),
-        ),
-    );
+        "variable" => [
+            "VAR_CLOSE" => [ "%}", "content", false ],
+            "ID"        => [ "[[:alpha:]][.[:alnum:]]*", "variable", false ],
+            "FILTER"    => [ ">[[:alpha:]][[:alnum:]]*", "variable", false ],
+            "BLANK"     => [ "[[:space:]]+", "variable", true ],
+        ],
+    ];
 
     /**
-     * Constructor (does nothing particular)
+     * Constructor (does nothing particular).
      */
-    public function __construct() {
-    
+    public function __construct()
+    {
     }
 
     /**
@@ -64,22 +77,25 @@ class Parser {
      * character is found, it throws a ParseError exception.
      *
      * @param string $string The string to parse.
+     *
      * @return TokenSequence The string parsed in the form of a TokenSequence.
+     *
      * @throws ParseError When an unexpected character is encountered.
      */
-    public function parseString(string $string) {
-        $state = "content";
+    public function parseString(string $string)
+    {
+        $state  = "content";
         $offset = 0;
         $tokens = new TokenSequence();
 
-        while($offset < strlen($string)) {
-            $found = FALSE;
+        while ($offset < strlen($string)) {
+            $found = false;
 
-            // Try every possible transition from the current state
-            foreach(self::AUTOMATON[$state] as $type => $transition) {
+            // Try every possible transition from the current state.
+            foreach (self::AUTOMATON[$state] as $type => $transition) {
                 list($regex, $nextState, $ignore) = $transition;
 
-                // Test if the regex matches
+                // Test if the regex matches.
                 $found = preg_match(
                     '/' . $regex . '/As',
                     $string,
@@ -88,29 +104,28 @@ class Parser {
                     $offset
                 );
 
-                // A token has been recognized
-                if($found) {
-                    // Add it to the Token array if it should not be ignored
-                    if(!$ignore) {
+                // A token has been recognized.
+                if ($found) {
+                    // Add it to the Token array if it should not be ignored.
+                    if (! $ignore) {
                         $tokens->addToken(
                             new Token($type, $matches[0], $offset)
                         );
                     }
 
-                    // Update the offset
+                    // Update the offset.
                     $offset += strlen($matches[0]);
 
-                    // Go to the next state
+                    // Go to the next state.
                     $state = $nextState;
                     break;
                 }
             }
 
-            if(!$found) {
+            if (! $found) {
                 // The automaton did not recognize a Token, throw an error
                 throw new \ParseError(
-                    "Unexpected character '" . $string[$offset] . "' " .
-                    "at offset " . $offset
+                    "Unexpected character '$string[$offset]' at offset $offset"
                 );
             }
         }

@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<ruleset name="Basic Project Coding Standards">
+    <rule ref="PSR2" />
+
+    <rule ref="Generic">
+        <!-- Rules of an ancient time... -->
+        <exclude name="Generic.PHP.ClosingPHPTag.NotFound" />
+        <exclude name="Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed" />
+        <exclude name="Generic.Arrays.DisallowShortArraySyntax.Found" />
+        <exclude name="Generic.Files.EndFileNoNewline.Found" />
+        <exclude name="Generic.Files.LowercasedFilename.NotFound" />
+        <exclude name="Generic.Functions.OpeningFunctionBraceBsdAllman.BraceOnSameLine" />
+
+        <!-- These rules are in conflict with PSR2 -->
+        <exclude name="Generic.Classes.OpeningBraceSameLine.BraceOnNewLine" />
+        <exclude name="Generic.PHP.UpperCaseConstant.Found" />
+        <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
+        <exclude name="Generic.Formatting.NoSpaceAfterCast.SpaceFound" />
+    </rule>
+
+    <rule ref="PEAR">
+        <!-- This rule is in conflict with Generic -->
+        <exclude name="PEAR.WhiteSpace.ScopeIndent.IncorrectExact" />
+
+        <!-- This rule is in conflict with PSR2 -->
+        <exclude name="PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore"/>
+        <exclude name="PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
+    </rule>
+
+    <!-- Some interesting rules from Squiz -->
+    <rule ref="Squiz.PHP.NonExecutableCode"/>
+    <rule ref="Squiz.PHP.CommentedOutCode"/>
+    <rule ref="Squiz.PHP.DiscouragedFunctions"/>
+    <rule ref="Squiz.PHP.ForbiddenFunctions"/>
+
+    <rule ref="Squiz.Classes.ClassDeclaration"/>
+    <rule ref="Squiz.ControlStructures.ControlSignature"/>
+    <rule ref="Squiz.ControlStructures.ForEachLoopDeclaration"/>
+    <rule ref="Squiz.ControlStructures.ForLoopDeclaration"/>
+    <rule ref="Squiz.Functions.FunctionDeclaration"/>
+    <rule ref="Squiz.Functions.FunctionDeclarationArgumentSpacing"/>
+    <rule ref="Squiz.WhiteSpace.ObjectOperatorSpacing"/>
+    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace"/>
+
+    <!-- Our files are located in src and tests directories -->
+    <file>./src</file>
+    <file>./test</file>
+</ruleset>

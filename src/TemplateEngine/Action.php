@@ -2,7 +2,13 @@
 /**
  * The Action class.
  *
- * @author Frédéric BISSON <zigazou@free.fr>
+ * PHP version 7
+ *
+ * @category Template
+ * @package  TemplateEngine
+ * @author   Frédéric BISSON <zigazou@free.fr>
+ * @license  GNU GPL
+ * @link     https://github.com/Zigazou/TemplateEngine
  */
 namespace TemplateEngine;
 
@@ -10,82 +16,106 @@ use TemplateEngine\Program;
 
 /**
  * An Action is a step or instruction in a Program.
+ *
+ * @category Template
+ * @package  TemplateEngine
+ * @author   Frédéric BISSON <zigazou@free.fr>
+ * @license  GNU GPL
+ * @link     https://github.com/Zigazou/TemplateEngine
  */
-class Action {
+class Action
+{
     /**
-     * @var string $type Action type.
+     * Action type.
+     *
+     * @var string $type
      */
     public $type = "";
 
     /**
-     * @var array $parameters List of parameters value.
+     * List of parameters value.
+     *
+     * @var array $parameters
      */
-    public $parameters = array();
+    public $parameters = [];
 
     /**
-     * @var int $offset Offset where this Action starts in a template string.
+     * Offset where this Action starts in a template string.
+     *
+     * @var int $offset
      */
     public $offset = 0;
 
     /**
-     * @var Program $program If the Action is a block, this attribute contains
-     *                       the block Actions.
+     * If the Action is a block, this attribute contains the block Actions.
+     *
+     * @var Program $program
      */
-    public $program = NULL;
+    public $program = null;
 
     /**
-     * @var Program $alternative If the Action is an if block, this attribute
-     *                           contains the block Actions to execute in the
-     *                           else part of the if Action.
+     * If the Action is an if block, this attribute contains the block Actions
+     * to execute in the else part of the if Action.
+     *
+     * @var Program $alternative
      */
-    public $alternative = NULL;
+    public $alternative = null;
 
     /**
      * Constructs a Program object
-     * 
+     *
      * If the Action represents a block, its Program must be added after the
      * object creation.
-     * 
-     * @param string $type A string representing the Action type
-     * @param array $parameters The list of parameters
-     * @param int $offset The offset at which the Action starts in the template
-     *                    string.
+     *
+     * @param string $type       A string representing the Action type
+     * @param array  $parameters The list of parameters
+     * @param int    $offset     The offset at which the Action starts in the
+     *                           template string.
      */
-    public function __construct(string $type, array $parameters, int $offset) {
-        $this->type = $type;
-        $this->parameters = $parameters;
-        $this->offset = $offset;
-        $this->program = new Program();
+    public function __construct(string $type, array $parameters, int $offset)
+    {
+        $this->type        = $type;
+        $this->parameters  = $parameters;
+        $this->offset      = $offset;
+        $this->program     = new Program();
         $this->alternative = new Program();
     }
 
     /**
      * Tells if the Action contains children Actions (in the case of a block).
-     * @return boolean TRUE if the Action contains children Actions, FALSE
+     *
+     * @return boolean true if the Action contains children Actions, false
      *                 otherwise
      */
-    public function hasActions() {
+    public function hasActions()
+    {
         return $this->program->hasActions()
             or $this->alternative->hasActions();
     }
 
     /**
      * Add an Action as a child.
+     *
      * @param Action $action The Action to add as a child to our Action.
+     *
      * @return Action Itself for chaining.
      */
-    public function addAction(Action $action) {
+    public function addAction(Action $action)
+    {
         $this->program->addAction($action);
         return $this;
     }
 
     /**
      * Add an Action as an alternative child.
+     *
      * @param Action $action The Action to add as an alternative child to our
      *                       Action.
+     *
      * @return Action Itself for chaining.
      */
-    public function addAlternative(Action $action) {
+    public function addAlternative(Action $action)
+    {
         $this->alternative->addAction($action);
         return $this;
     }
